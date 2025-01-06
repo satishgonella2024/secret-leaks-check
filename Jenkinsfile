@@ -32,7 +32,7 @@ pipeline {
                 echo "Running Checkov to scan IaC for misconfigurations"
                 script {
                     sh """
-                    checkov -f main.tf --output json > checkov-report.json
+                     /home/satish/.local/bin/checkov -f main.tf --output json > checkov-report.json
                     """
                 }
             }
