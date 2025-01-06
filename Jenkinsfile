@@ -17,18 +17,28 @@ pipeline {
                 """
             }
         }
+
+        stage('Run Checkov') {
+            steps {
+                echo "Running Checkov to scan IaC for misconfigurations"
+                sh """
+                checkov -f main.tf --output json > checkov-report.json
+                """
+            }
+        }
     }
 
     post {
         always {
-            echo "Archiving GitLeaks report"
-            archiveArtifacts artifacts: 'gitleaks-report.json', allowEmptyArchive: false
+            echo "Archiving GitLeaks and Checkov reports"
+            archiveArtifacts artifacts: 'gitleaks-report.json', allowEmptyArchive: true
+            archiveArtifacts artifacts: 'checkov-report.json', allowEmptyArchive: true
         }
         success {
-            echo "No sensitive information detected. Build successful!"
+            echo "No issues detected. Build successful!"
         }
         failure {
-            echo "Sensitive information detected! Check gitleaks-report.json for details."
+            echo "Issues detected! Check the reports for details."
         }
     }
 }
