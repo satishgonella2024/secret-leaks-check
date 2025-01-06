@@ -12,18 +12,29 @@ pipeline {
         stage('Run GitLeaks') {
             steps {
                 echo "Running GitLeaks with custom rules"
-                sh """
-                gitleaks detect --source . --no-git --config .gitleaks.toml --exit-code 1 --report-path gitleaks-report.json --verbose
-                """
+                script {
+                    def result = sh(
+                        script: """
+                        gitleaks detect --source . --no-git --config .gitleaks.toml --exit-code 1 --report-path gitleaks-report.json --verbose
+                        """,
+                        returnStatus: true // Capture the exit code
+                    )
+                    if (result != 0) {
+                        echo "Sensitive information detected! Marking build as UNSTABLE."
+                        currentBuild.result = 'UNSTABLE'
+                    }
+                }
             }
         }
 
         stage('Run Checkov') {
             steps {
                 echo "Running Checkov to scan IaC for misconfigurations"
-                sh """
-                checkov -f main.tf --output json > checkov-report.json
-                """
+                script {
+                    sh """
+                    checkov -f main.tf --output json > checkov-report.json
+                    """
+                }
             }
         }
     }
@@ -36,6 +47,9 @@ pipeline {
         }
         success {
             echo "No issues detected. Build successful!"
+        }
+        unstable {
+            echo "Build marked as UNSTABLE due to GitLeaks findings!"
         }
         failure {
             echo "Issues detected! Check the reports for details."
