@@ -1,0 +1,14 @@
+[[rules]]
+id = "custom-aws-secret-key"
+description = "Custom AWS Secret Key"
+regex = '''AWS_SECRET_ACCESS_KEY=AKIA[0-9A-Z]{16}'''
+
+[[rules]]
+id = "custom-database-password"
+description = "Custom Database Password"
+regex = '''DATABASE_PASSWORD=.*'''
+
+[[rules]]
+id = "custom-private-key"
+description = "Custom Private Key"
+regex = '''PRIVATE_KEY=.*'''
